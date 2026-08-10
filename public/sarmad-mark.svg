@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="48" x2="448" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#172033"/>
+      <stop offset="1" stop-color="#0E1623"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="128" y1="80" x2="392" y2="432" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7C8A8"/>
+      <stop offset="0.5" stop-color="#F4A261"/>
+      <stop offset="1" stop-color="#E8845C"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="32" y="32" width="448" height="448" rx="120" fill="url(#bg)"/>
+  <rect x="32" y="32" width="448" height="448" rx="120" stroke="rgba(244,162,97,0.38)" stroke-width="4"/>
+
+  <path d="M170 184C170 142.026 205.026 107 247 107H320C357.555 107 388 137.445 388 175C388 204.788 366.998 230.534 338.92 240.788L267.54 267.67C234.167 281.668 210 311.288 210 346C210 387.974 245.026 423 287 423H335C367.033 423 393 397.033 393 365" stroke="url(#accent)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M222 214H300C325.405 214 346 233.595 346 259C346 284.405 325.405 304 300 304H236C210.595 304 190 323.595 190 349C190 374.405 210.595 395 236 395H322" stroke="#F7F5F2" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <circle cx="388" cy="365" r="18" fill="url(#accent)"/>
+</svg>

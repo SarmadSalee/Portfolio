@@ -1,0 +1,17 @@
+
+> portfolio@0.1.0 dev
+> next dev --port 3111
+
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3111
+- Network:       http://192.168.1.107:3111
+✓ Ready in 813ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          22240
+- Dir:          D:\All Folder\Paper-house\portfolio
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 22240 /F to stop it.
+[?25h
