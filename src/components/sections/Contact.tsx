@@ -189,7 +189,7 @@ export function Contact() {
                 GitHub
               </a>
               <a
-                href="https://www.linkedin.com/in/sarmad-saleem-111176200/"
+                href="https://www.linkedin.com/in/sarmad-saleem-dev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 glass-card p-4 rounded-2xl flex items-center justify-center gap-2 text-sm text-foreground hover:border-primary/20 transition-all"

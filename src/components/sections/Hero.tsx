@@ -115,7 +115,7 @@ export function Hero() {
             View on GitHub
           </a>
           <a
-            href="https://www.linkedin.com/in/sarmad-saleem-111176200/"
+            href="https://www.linkedin.com/in/sarmad-saleem-dev"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-secondary inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm"

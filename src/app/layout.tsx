@@ -5,45 +5,117 @@ import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://sarmad-dev-portfolio.netlify.app";
+
 export const metadata: Metadata = {
-  title: "Sarmad Saleem | AI Software Engineer & SaaS Product Builder",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Sarmad Saleem | Full Stack Developer & SaaS Product Builder",
+    template: "%s | Sarmad Saleem",
+  },
   description:
-    "I build scalable AI applications, enterprise HR systems, modern SaaS platforms, and cloud-powered web applications using React, Next.js, Node.js, AWS, MongoDB, and Large Language Models.",
+    "I'm Sarmad Saleem, a Senior Full Stack Developer building SaaS products, AI automation systems, and enterprise software with React, Next.js, Node.js, MongoDB, and AWS. 5+ years of experience, 50+ projects shipped.",
   keywords: [
-    "AI Engineer",
+    "Sarmad Saleem",
     "Full Stack Developer",
+    "AI Engineer",
     "SaaS Product Builder",
-    "React",
-    "Next.js",
+    "React Developer",
+    "Next.js Developer",
     "Node.js",
     "AWS",
     "MongoDB",
     "TypeScript",
     "Enterprise Software",
+    "AI Automation",
   ],
-  authors: [{ name: "Sarmad Saleem" }],
+  authors: [{ name: "Sarmad Saleem", url: SITE_URL }],
+  creator: "Sarmad Saleem",
+  publisher: "Sarmad Saleem",
+  alternates: {
+    canonical: "/",
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: "/sarmad-mark.svg",
     shortcut: "/sarmad-mark.svg",
     apple: "/sarmad-mark.svg",
   },
   openGraph: {
-    title: "Sarmad Saleem | AI Software Engineer",
-    description:
-      "Building AI-powered SaaS products that solve real business problems.",
     type: "website",
+    url: SITE_URL,
+    siteName: "Sarmad Saleem",
     locale: "en_US",
+    title: "Sarmad Saleem | Full Stack Developer & SaaS Product Builder",
+    description:
+      "I build SaaS products, AI automation systems, and enterprise software with React, Next.js, Node.js, MongoDB, and AWS.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Sarmad Saleem — Logo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sarmad Saleem | AI Software Engineer",
+    site: "@sarmadsaleem",
+    creator: "@sarmadsaleem",
+    title: "Sarmad Saleem | Full Stack Developer & SaaS Product Builder",
     description:
-      "Building AI-powered SaaS products that solve real business problems.",
+      "I build SaaS products, AI automation systems, and enterprise software with React, Next.js, Node.js, MongoDB, and AWS.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
+  verification: {
+    // Add your Google Search Console verification code here, e.g. google: "xxxxxxxxxxxxx"
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
+  category: "Portfolio",
+  applicationName: "Sarmad Saleem Portfolio",
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Sarmad Saleem",
+  url: SITE_URL,
+  image: `${SITE_URL}/sarmad-mark.svg`,
+  jobTitle: "Senior Full Stack Developer",
+  worksFor: {
+    "@type": "Organization",
+    name: "Max HR",
+  },
+  knowsAbout: [
+    "SaaS Product Development",
+    "AI Automation",
+    "React",
+    "Next.js",
+    "Node.js",
+    "AWS",
+    "MongoDB",
+    "Enterprise Software",
+  ],
+  sameAs: [
+    "https://github.com/SarmadSalee",
+    "https://www.linkedin.com/in/sarmad-saleem-dev",
+  ],
 };
 
 export default function RootLayout({
@@ -59,6 +131,13 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
+        />
+        <link rel="canonical" href={`${SITE_URL}/`} />
+        <meta name="theme-color" content="#0E1623" />
+        <meta name="author" content="Sarmad Saleem" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className="min-h-screen antialiased" suppressHydrationWarning>

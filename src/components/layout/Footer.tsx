@@ -65,7 +65,7 @@ export function Footer() {
                 <FiGithub size={18} />
               </a>
               <a
-                href="https://www.linkedin.com/in/sarmad-saleem-111176200/"
+                href="https://www.linkedin.com/in/sarmad-saleem-dev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted hover:text-primary hover:border-primary/40 transition-all"
