@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -135,6 +136,18 @@ export default function RootLayout({
         <link rel="canonical" href={`${SITE_URL}/`} />
         <meta name="theme-color" content="#0E1623" />
         <meta name="author" content="Sarmad Saleem" />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-H742CC2C9K"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-H742CC2C9K');
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
