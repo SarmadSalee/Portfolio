@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
 const SITE_URL =
-	process.env.SITE_URL || "https://sarmad-dev-portfolio.netlify.app";
+	process.env.SITE_URL || "https://sarmad-dev-portfolio.vercel.app";
 
 const BRAND = {
 	name: "Sarmad Saleem",
