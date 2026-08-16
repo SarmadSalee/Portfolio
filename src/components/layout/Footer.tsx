@@ -19,16 +19,11 @@ export function Footer() {
               className="flex items-center gap-3"
               aria-label="Sarmad home"
             >
-              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-primary/30 bg-white shadow-[0_4px_16px_rgba(17,28,42,0.14)]">
-                <img
-                  src={theme === "dark" ? "/white-logo.png" : "/dark-logo.png"}
-                  alt="Sarmad logo"
-                  className="h-6 w-6 object-contain"
-                />
-              </div>
-              <span className="text-lg font-bold tracking-tight text-foreground leading-none">
-                Sarmad<span className="text-primary">.</span>
-              </span>
+              <img
+                src={theme === "dark" ? "/white-logo.png" : "/dark-logo.png"}
+                alt="Sarmad logo"
+                className="h-14 w-14 object-contain drop-shadow-lg"
+              />
             </a>
             <p className="mt-4 text-sm text-muted leading-relaxed max-w-xs">
               I build SaaS products and AI automation systems that help

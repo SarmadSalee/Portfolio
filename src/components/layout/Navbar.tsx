@@ -34,17 +34,12 @@ export function Navbar() {
           className="flex items-center gap-3 group"
           aria-label="Sarmad home"
         >
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-primary/30 bg-white shadow-[0_4px_16px_rgba(17,28,42,0.14)]">
-            <img
-              src={theme === "dark" ? "/white-logo.png" : "/dark-logo.png"}
-              alt="Sarmad logo"
-              className="h-7 w-7 object-contain"
-            />
-          </div>
-          <div className="text-lg font-bold tracking-tight text-foreground leading-none">
-            Sarmad
-            <span className="text-primary">.</span>
-          </div>
+          <img
+            src={theme === "dark" ? "/white-logo.png" : "/dark-logo.png"}
+            alt="Sarmad logo"
+            className="h-16 w-16 object-contain drop-shadow-lg"
+          />
+          
         </a>
 
         <div className="hidden md:flex items-center gap-8">
