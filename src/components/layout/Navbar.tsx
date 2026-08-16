@@ -34,9 +34,9 @@ export function Navbar() {
           className="flex items-center gap-3 group"
           aria-label="Sarmad home"
         >
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-primary/30 bg-[#121d2c] shadow-[0_4px_16px_rgba(17,28,42,0.14)]">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-primary/30 bg-white shadow-[0_4px_16px_rgba(17,28,42,0.14)]">
             <img
-              src="/sarmad-mark.svg"
+              src={theme === "dark" ? "/white-logo.png" : "/dark-logo.png"}
               alt="Sarmad logo"
               className="h-7 w-7 object-contain"
             />

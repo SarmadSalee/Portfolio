@@ -6,7 +6,7 @@ const SITE_URL =
 
 const BRAND = {
 	name: "Sarmad Saleem",
-	logo: `${SITE_URL}/sarmad-mark.svg`,
+	logo: `${SITE_URL}/dark-logo.png`,
 	accent: "#F4A261",
 	accentDark: "#E8845C",
 	bg: "#0E1623",

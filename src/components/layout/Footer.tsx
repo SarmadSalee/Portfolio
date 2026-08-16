@@ -1,8 +1,10 @@
 "use client";
 
 import { FiGithub, FiLinkedin, FiMail, FiArrowUp } from "react-icons/fi";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 export function Footer() {
+  const { theme } = useTheme();
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -17,9 +19,9 @@ export function Footer() {
               className="flex items-center gap-3"
               aria-label="Sarmad home"
             >
-              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-primary/30 bg-[#121d2c] shadow-[0_4px_16px_rgba(17,28,42,0.14)]">
+              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-primary/30 bg-white shadow-[0_4px_16px_rgba(17,28,42,0.14)]">
                 <img
-                  src="/sarmad-mark.svg"
+                  src={theme === "dark" ? "/white-logo.png" : "/dark-logo.png"}
                   alt="Sarmad logo"
                   className="h-6 w-6 object-contain"
                 />
