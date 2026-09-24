@@ -2,12 +2,23 @@
 
 import { useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 import {
+  FiCheckCircle,
   FiMail,
   FiGithub,
   FiLinkedin,
   FiSend,
 } from "react-icons/fi";
+
+const countryNameFormatter = new Intl.DisplayNames(["en"], { type: "region" });
+const countryOptions = getCountries()
+  .map((country) => ({
+    country,
+    name: countryNameFormatter.of(country) || country,
+    callingCode: `+${getCountryCallingCode(country)}`,
+  }))
+  .sort((first, second) => first.name.localeCompare(second.name));
 
 export function Contact() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -16,10 +27,21 @@ export function Contact() {
     offset: ["start end", "end start"],
   });
   const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
-  const [formState, setFormState] = useState({ name: "", email: "", message: "" });
+  const [formState, setFormState] = useState({
+    name: "",
+    email: "",
+    countryCode: "+92",
+    phone: "",
+    company: "",
+    service: "",
+    timeline: "",
+    message: "",
+  });
   const [submitted, setSubmitted] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
+  const [website, setWebsite] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +52,12 @@ export function Contact() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formState),
+        body: JSON.stringify({
+          ...formState,
+          phone: formState.phone ? `${formState.countryCode} ${formState.phone}` : "",
+          formStartedAt,
+          website,
+        }),
       });
 
       const data = await response.json();
@@ -40,8 +67,18 @@ export function Contact() {
       }
 
       setSubmitted(true);
-      setFormState({ name: "", email: "", message: "" });
-      setTimeout(() => setSubmitted(false), 3000);
+      setFormState({
+        name: "",
+        email: "",
+        countryCode: "+92",
+        phone: "",
+        company: "",
+        service: "",
+        timeline: "",
+        message: "",
+      });
+      setFormStartedAt(Date.now());
+      setWebsite("");
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Something went wrong. Please try again."
@@ -77,35 +114,111 @@ export function Contact() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
           <motion.div style={{ y }}>
             <form onSubmit={handleSubmit} className="bg-white border border-border p-8 rounded-3xl space-y-5 shadow-soft">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Name
-                </label>
+              <div className="absolute left-[-9999px] h-px w-px overflow-hidden" aria-hidden="true">
+                <label htmlFor="website">Website</label>
                 <input
-                  type="text"
-                  required
-                  value={formState.name}
-                  onChange={(e) =>
-                    setFormState({ ...formState, name: e.target.value })
-                  }
-                  className="w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
-                  placeholder="Your name"
+                  id="website"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formState.email}
-                  onChange={(e) =>
-                    setFormState({ ...formState, email: e.target.value })
-                  }
-                  className="w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
-                  placeholder="your@email.com"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={formState.name}
+                    onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={formState.email}
+                    onChange={(e) => setFormState({ ...formState, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                    placeholder="your@email.com"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Phone <span className="text-muted font-normal">(optional)</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      value={formState.countryCode}
+                      onChange={(e) => setFormState({ ...formState, countryCode: e.target.value })}
+                      aria-label="Country code"
+                      className="w-[92px] shrink-0 px-2 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                    >
+                      {countryOptions.map((option) => (
+                        <option key={option.country} value={option.callingCode}>
+                          {option.name} ({option.callingCode})
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      value={formState.phone}
+                      onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
+                      className="min-w-0 w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                      placeholder="300 1234567"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Company <span className="text-muted font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formState.company}
+                    onChange={(e) => setFormState({ ...formState, company: e.target.value })}
+                    className="w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                    placeholder="Company or organization"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">What do you need?</label>
+                  <select
+                    value={formState.service}
+                    onChange={(e) => setFormState({ ...formState, service: e.target.value })}
+                    className="w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                  >
+                    <option value="">Select a service</option>
+                    <option value="Web application">Web application</option>
+                    <option value="SaaS platform">SaaS platform</option>
+                    <option value="AI automation">AI automation</option>
+                    <option value="API or backend">API or backend</option>
+                    <option value="Consulting">Consulting</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">Target timeline</label>
+                  <select
+                    value={formState.timeline}
+                    onChange={(e) => setFormState({ ...formState, timeline: e.target.value })}
+                    className="w-full px-4 py-3 bg-bg-soft border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                  >
+                    <option value="">When would you like to start?</option>
+                    <option value="Immediately">Immediately</option>
+                    <option value="Within 1 month">Within 1 month</option>
+                    <option value="1 - 3 months">1 - 3 months</option>
+                    <option value="3+ months">3+ months</option>
+                    <option value="Just exploring">Just exploring</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
@@ -126,6 +239,25 @@ export function Contact() {
                 <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                   {errorMessage}
                 </div>
+              )}
+              {submitted && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-2xl border border-green-200 bg-green-50 p-5 text-center"
+                  role="status"
+                >
+                  <FiCheckCircle className="mx-auto mb-3 text-green-600" size={28} />
+                  <h3 className="text-base font-semibold text-green-900">
+                    Thank you for reaching out
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-green-800">
+                    Your message has been received successfully. Someone from our team will review your inquiry and contact you shortly.
+                  </p>
+                  <p className="mt-2 text-xs text-green-700">
+                    We appreciate your interest and look forward to speaking with you.
+                  </p>
+                </motion.div>
               )}
 
               <motion.button

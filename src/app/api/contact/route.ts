@@ -1,5 +1,118 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MongoClient } from "mongodb";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import nodemailer from "nodemailer";
+
+const requestLog = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 5;
+
+function getClientAddress(request: NextRequest) {
+	return (
+		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+	);
+}
+
+function isLocallyRateLimited(address: string) {
+	const now = Date.now();
+	const recentRequests = (requestLog.get(address) || []).filter(
+		(timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS,
+	);
+
+	if (recentRequests.length >= RATE_LIMIT_MAX_REQUESTS) {
+		requestLog.set(address, recentRequests);
+		return true;
+	}
+
+	recentRequests.push(now);
+	requestLog.set(address, recentRequests);
+	return false;
+}
+
+type Lead = {
+	name: string;
+	email: string;
+	phone: string;
+	company: string;
+	service: string;
+	timeline: string;
+	message: string;
+	createdAt: Date;
+	status: "new";
+};
+
+const mongoClient = process.env.MONGODB_URI
+	? new MongoClient(process.env.MONGODB_URI)
+	: null;
+
+const databaseName = process.env.MONGODB_DB || "portfolio";
+
+type RateLimitRecord = {
+	_id: string;
+	count: number;
+	windowStartedAt: Date;
+	expiresAt: Date;
+};
+
+const mongoClientPromise = mongoClient?.connect();
+const rateLimitIndexPromise = mongoClientPromise?.then((client) =>
+	client
+		.db(databaseName)
+		.collection<RateLimitRecord>("contact_rate_limits")
+		.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+);
+
+async function isRateLimited(address: string) {
+	const locallyLimited = isLocallyRateLimited(address);
+	if (locallyLimited || !mongoClientPromise) {
+		return locallyLimited;
+	}
+
+	try {
+		const client = await mongoClientPromise;
+		await rateLimitIndexPromise;
+		const collection = client
+			.db(databaseName)
+			.collection<RateLimitRecord>("contact_rate_limits");
+		const now = new Date();
+		const windowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_MS);
+		const current = await collection.findOne({ _id: address });
+
+		if (!current || current.windowStartedAt < windowStart) {
+			await collection.updateOne(
+				{ _id: address },
+				{
+					$set: {
+						count: 1,
+						windowStartedAt: now,
+						expiresAt: new Date(now.getTime() + RATE_LIMIT_WINDOW_MS),
+					},
+				},
+				{ upsert: true },
+			);
+			return false;
+		}
+
+		const updated = await collection.findOneAndUpdate(
+			{ _id: address, count: { $lt: RATE_LIMIT_MAX_REQUESTS } },
+			{ $inc: { count: 1 } },
+			{ returnDocument: "after" },
+		);
+		return !updated;
+	} catch (error) {
+		console.error("Persistent contact rate limit error:", error);
+		return locallyLimited;
+	}
+}
+
+async function saveLead(lead: Lead) {
+	if (!mongoClientPromise) {
+		throw new Error("MONGODB_URI is not configured.");
+	}
+
+	const client = await mongoClientPromise;
+	return client.db(databaseName).collection<Lead>("leads").insertOne(lead);
+}
 
 const SITE_URL =
 	process.env.SITE_URL || "https://sarmad-dev-portfolio.vercel.app";
@@ -15,13 +128,27 @@ const BRAND = {
 function adminNotificationHtml({
 	name,
 	email,
+	phone,
+	company,
+	service,
+	timeline,
 	message,
 }: {
 	name: string;
 	email: string;
+	phone: string;
+	company: string;
+	service: string;
+	timeline: string;
 	message: string;
 }) {
-	const messageHtml = message.replace(/\n/g, "<br />");
+	const escapeHtml = (value: string) =>
+		value
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/\"/g, "&quot;");
+	const messageHtml = escapeHtml(message).replace(/\n/g, "<br />");
 	return `
   <html>
     <head>
@@ -46,8 +173,12 @@ function adminNotificationHtml({
         <div class="body">
           <h3 style="margin-top: 0; color: #111827;">New message from your portfolio</h3>
           <div class="details">
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
+			<p><strong>Name:</strong> ${escapeHtml(name)}</p>
+			<p><strong>Email:</strong> ${escapeHtml(email)}</p>
+			<p><strong>Phone:</strong> ${escapeHtml(phone || "Not provided")}</p>
+			<p><strong>Company:</strong> ${escapeHtml(company || "Not provided")}</p>
+			<p><strong>Service:</strong> ${escapeHtml(service || "Not specified")}</p>
+			<p><strong>Timeline:</strong> ${escapeHtml(timeline || "Not specified")}</p>
           </div>
           <p><strong style="color: #111827;">Message:</strong></p>
           <div class="msg">${messageHtml}</div>
@@ -101,9 +232,43 @@ function clientAutoresponseHtml({ name }: { name: string }) {
 export async function POST(request: NextRequest) {
 	try {
 		const body = await request.json();
+		const clientAddress = getClientAddress(request);
+		const website =
+			typeof body?.website === "string" ? body.website.trim() : "";
+		const formStartedAt = Number(body?.formStartedAt);
+
+		if (
+			website ||
+			!Number.isFinite(formStartedAt) ||
+			Date.now() - formStartedAt < 2500
+		) {
+			return NextResponse.json({
+				success: true,
+				message: "Your message was received.",
+			});
+		}
+
+		if (await isRateLimited(clientAddress)) {
+			return NextResponse.json(
+				{
+					success: false,
+					message: "Too many requests. Please try again later.",
+				},
+				{ status: 429 },
+			);
+		}
+
 		const name = typeof body?.name === "string" ? body.name.trim() : "";
 		const email = typeof body?.email === "string" ? body.email.trim() : "";
-		const message = typeof body?.message === "string" ? body.message.trim() : "";
+		const phone = typeof body?.phone === "string" ? body.phone.trim() : "";
+		const company =
+			typeof body?.company === "string" ? body.company.trim() : "";
+		const service =
+			typeof body?.service === "string" ? body.service.trim() : "";
+		const timeline =
+			typeof body?.timeline === "string" ? body.timeline.trim() : "";
+		const message =
+			typeof body?.message === "string" ? body.message.trim() : "";
 
 		if (!name || !email || !message) {
 			return NextResponse.json(
@@ -119,6 +284,41 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		if (phone && !parsePhoneNumberFromString(phone)?.isValid()) {
+			return NextResponse.json(
+				{ success: false, message: "Please enter a valid phone number." },
+				{ status: 400 },
+			);
+		}
+
+		if (
+			name.length > 120 ||
+			email.length > 254 ||
+			phone.length > 40 ||
+			company.length > 160 ||
+			message.length > 5000
+		) {
+			return NextResponse.json(
+				{
+					success: false,
+					message: "Please shorten one or more fields and try again.",
+				},
+				{ status: 400 },
+			);
+		}
+
+		await saveLead({
+			name,
+			email,
+			phone,
+			company,
+			service,
+			timeline,
+			message,
+			createdAt: new Date(),
+			status: "new",
+		});
+
 		const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
 		const smtpPort = Number(process.env.SMTP_PORT || 587);
 		const smtpSecure = process.env.SMTP_SECURE === "true";
@@ -128,10 +328,10 @@ export async function POST(request: NextRequest) {
 			process.env.CONTACT_EMAIL || smtpUser || "sarmad.saleem62@gmail.com";
 
 		if (!smtpUser || !smtpPass) {
-			return NextResponse.json(
-				{ success: false, message: "Email credentials are not configured." },
-				{ status: 500 },
-			);
+			return NextResponse.json({
+				success: true,
+				message: "Your message was received.",
+			});
 		}
 
 		const transporter = nodemailer.createTransport({
@@ -150,8 +350,16 @@ export async function POST(request: NextRequest) {
 			to: contactEmail,
 			replyTo: `${name} <${email}>`,
 			subject: `New Portfolio Inquiry from: ${name}`,
-			text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
-			html: adminNotificationHtml({ name, email, message }),
+			text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || "Not provided"}\nCompany: ${company || "Not provided"}\nService: ${service || "Not specified"}\nTimeline: ${timeline || "Not specified"}\n\nMessage:\n${message}`,
+			html: adminNotificationHtml({
+				name,
+				email,
+				phone,
+				company,
+				service,
+				timeline,
+				message,
+			}),
 		});
 
 		// Email 2: Confirmation autoresponse to the visitor (mirrors the PHP client email)
