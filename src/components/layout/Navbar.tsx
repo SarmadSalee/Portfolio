@@ -54,7 +54,7 @@ export function Navbar() {
             </a>
           ))}
           <a
-            href="#contact"
+            href="/contact"
             className="btn-primary px-5 py-2.5 rounded-xl font-semibold text-sm"
           >
             Let&apos;s Talk
@@ -123,7 +123,7 @@ export function Navbar() {
                 </motion.a>
               ))}
               <a
-                href="#contact"
+                href="/contact"
                 onClick={() => setMobileOpen(false)}
                 className="btn-primary px-5 py-3 rounded-xl font-semibold text-sm text-center"
               >
