@@ -1,6 +1,7 @@
 "use client";
 
 import { FiGithub, FiLinkedin, FiMail, FiArrowUp } from "react-icons/fi";
+import Link from "next/link";
 import { useTheme } from "@/components/providers/ThemeProvider";
 
 export function Footer() {
@@ -14,8 +15,8 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-12 py-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
           <div>
-            <a
-              href="#home"
+            <Link
+              href="/#home"
               className="flex items-center gap-3"
               aria-label="Sarmad home"
             >
@@ -24,7 +25,7 @@ export function Footer() {
                 alt="Sarmad logo"
                 className="h-14 w-14 object-contain drop-shadow-lg"
               />
-            </a>
+            </Link>
             <p className="mt-4 text-sm text-muted leading-relaxed max-w-xs">
               I build SaaS products and AI automation systems that help
               businesses ship faster and scale with confidence.
