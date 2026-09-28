@@ -148,6 +148,10 @@ export default function RootLayout({
             gtag('config', 'G-H742CC2C9K');
           `}
         </Script>
+        <Script
+          src="https://sc.lfeeder.com/lftracker_v1_Xbp1oaE0yBq4EdVj.js"
+          strategy="afterInteractive"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
