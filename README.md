@@ -25,7 +25,7 @@ A modern, single-page portfolio built with **Next.js 16**, **TypeScript**, and *
 | Animation   | Framer Motion, GSAP, Lenis                                          |
 | 3D          | Three.js, @react-three/fiber, @react-three/drei                     |
 | Icons       | react-icons, lucide-react                                           |
-| Misc        | Nodemailer (contact form), ESLint                                   |
+| Misc        | MongoDB (lead storage), Nodemailer (optional email), ESLint        |
 
 ## 🚀 Getting Started
 
@@ -49,6 +49,10 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Contact form configuration
+
+Copy `.env.example` to `.env.local` and set `MONGODB_URI` to the supplied MongoDB connection string. Leads are stored in the `portfolio.leads` collection by default; set `MONGODB_DB` to use another database name. SMTP variables are optional: when configured, the owner notification and visitor confirmation emails are also sent after the lead is stored.
 
 ## 📜 Scripts
 

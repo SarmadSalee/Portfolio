@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { navLinks } from "@/data/portfolio";
 import { useTheme } from "@/components/providers/ThemeProvider";
@@ -29,8 +30,8 @@ export function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <a
-          href="#home"
+        <Link
+          href="/#home"
           className="flex items-center gap-3 group"
           aria-label="Sarmad home"
         >
@@ -40,7 +41,7 @@ export function Navbar() {
             className="h-16 w-16 object-contain drop-shadow-lg"
           />
           
-        </a>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
@@ -54,7 +55,7 @@ export function Navbar() {
             </a>
           ))}
           <a
-            href="#contact"
+            href="/contact"
             className="btn-primary px-5 py-2.5 rounded-xl font-semibold text-sm"
           >
             Let&apos;s Talk
@@ -123,7 +124,7 @@ export function Navbar() {
                 </motion.a>
               ))}
               <a
-                href="#contact"
+                href="/contact"
                 onClick={() => setMobileOpen(false)}
                 className="btn-primary px-5 py-3 rounded-xl font-semibold text-sm text-center"
               >
